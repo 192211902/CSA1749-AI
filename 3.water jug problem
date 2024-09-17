@@ -1,0 +1,59 @@
+from collections import deque
+
+def is_valid(state, a, b):
+    x, y = state
+    return 0 <= x <= a and 0 <= y <= b
+
+def bfs_water_jug(a, b, target):
+    queue = deque([(0, 0)])  
+    visited = set()
+    visited.add((0, 0))
+    parent = {}
+    parent[(0, 0)] = None
+
+    while queue:
+        curr_state = queue.popleft()
+        x, y = curr_state
+
+        if x == target or y == target:
+            path = []
+            while curr_state is not None:
+                path.append(curr_state)
+                curr_state = parent[curr_state]
+            path.reverse()
+            return path
+
+        next_states = [
+            (a, y),    
+            (x, b),    
+            (0, y),    
+            (x, 0),    
+            (max(x - (b - y), 0), min(b, y + x)),  
+            (min(a, x + y), max(y - (a - x), 0))   
+        ]
+
+        for state in next_states:
+            if state not in visited and is_valid(state, a, b):
+                queue.append(state)
+                visited.add(state)
+                parent[state] = (x, y)
+    
+    return None
+
+def print_solution(path):
+    if path is None:
+        print("No solution exists.")
+    else:
+        for step in path:
+            print(f"Jug A: {step[0]} liters, Jug B: {step[1]} liters")
+
+def main():
+    a = 4  
+    b = 3  
+    target = 2  
+
+    solution_path = bfs_water_jug(a, b, target)
+    print_solution(solution_path)
+
+if __name__ == "__main__":
+    main()
