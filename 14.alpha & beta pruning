@@ -1,0 +1,65 @@
+class GameState:
+    def __init__(self, board, player):
+        self.board = board
+        self.player = player
+
+    def is_terminal(self):
+        return self.check_win() or self.check_draw()
+
+    def check_win(self):
+        pass
+
+    def check_draw(self):
+        return not any(0 in row for row in self.board)
+
+    def get_possible_moves(self):
+        moves = []
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j] == 0:
+                    moves.append((i, j))
+        return moves
+
+    def make_move(self, move):
+        new_board = [row[:] for row in self.board]
+        new_board[move[0]][move[1]] = self.player
+        return GameState(new_board, -self.player)
+
+def alpha_beta(state, depth, alpha, beta):
+    if depth == 0 or state.is_terminal():
+        return evaluate(state)
+
+    if state.player == 1:
+        max_eval = float('-inf')
+        for move in state.get_possible_moves():
+            eval = alpha_beta(state.make_move(move), depth - 1, alpha, beta)
+            max_eval = max(max_eval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+        return max_eval
+    else:
+        min_eval = float('inf')
+        for move in state.get_possible_moves():
+            eval = alpha_beta(state.make_move(move), depth - 1, alpha, beta)
+            min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+        return min_eval
+
+def evaluate(state):
+    score = 0
+    if state.check_win():
+        score = 10 if state.player == 1 else -10
+    return score
+
+initial_board = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+]
+
+initial_state = GameState(initial_board, 1)
+best_score = alpha_beta(initial_state, depth=5, alpha=float('-inf'), beta=float('inf'))
+print("Best score from the initial state:", best_score)
